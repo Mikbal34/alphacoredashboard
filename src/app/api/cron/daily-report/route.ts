@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { resend } from "@/lib/resend"
+import { getResend } from "@/lib/resend"
 import { DailyReportEmail } from "@/emails/daily-report"
 import { render } from "@react-email/components"
 
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
         try {
           const emailHtml = await render(DailyReportEmail(reportData))
 
-          await resend.emails.send({
+          await getResend().emails.send({
             from: process.env.EMAIL_FROM || "noreply@alphacore.com",
             to: recipient,
             subject: `Günlük Rapor - ${today.toLocaleDateString("tr-TR")}`,
