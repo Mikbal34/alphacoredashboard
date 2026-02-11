@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
           const emailHtml = await render(WeeklyReportEmail(reportData))
 
           await getResend().emails.send({
-            from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+            from: process.env.EMAIL_FROM || "noreply@alphacore.com.tr",
             to: recipient,
             subject: `Haftalık Rapor - ${weekStart.toLocaleDateString("tr-TR")} - ${weekEnd.toLocaleDateString("tr-TR")}`,
             html: emailHtml,
