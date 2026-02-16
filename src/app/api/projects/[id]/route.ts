@@ -132,7 +132,11 @@ export async function PUT(
 
     const updatedProject = await prisma.project.update({
       where: { id },
-      data: validatedData,
+      data: {
+        ...validatedData,
+        startDate: validatedData.startDate ? new Date(validatedData.startDate) : null,
+        endDate: validatedData.endDate ? new Date(validatedData.endDate) : null,
+      },
       include: {
         members: {
           include: {

@@ -76,6 +76,8 @@ export async function POST(request: Request) {
     const project = await prisma.project.create({
       data: {
         ...validatedData,
+        startDate: validatedData.startDate ? new Date(validatedData.startDate) : null,
+        endDate: validatedData.endDate ? new Date(validatedData.endDate) : null,
         members: {
           create: {
             userId: session.user.id,

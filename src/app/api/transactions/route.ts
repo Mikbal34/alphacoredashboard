@@ -89,6 +89,7 @@ export async function POST(req: NextRequest) {
     const transaction = await prisma.transaction.create({
       data: {
         ...validatedData,
+        date: new Date(validatedData.date),
         userId: session.user.id,
       },
       include: {

@@ -151,6 +151,7 @@ model Project {
   description String?
   status      ProjectStatus @default(PLANNING)
   color       String        @default("#6366f1")
+  budget      Float?
   startDate   DateTime?
   endDate     DateTime?
   createdAt   DateTime      @default(now())

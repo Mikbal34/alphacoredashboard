@@ -60,6 +60,7 @@ interface Project {
   description: string | null
   status: ProjectStatus
   color: string
+  budget: number | null
   startDate: Date | null
   endDate: Date | null
   members: Array<{
@@ -91,6 +92,7 @@ export default function ProjectsPage() {
       description: "",
       status: "PLANNING",
       color: "#6366f1",
+      budget: undefined,
       startDate: undefined,
       endDate: undefined,
     },
@@ -262,6 +264,33 @@ export default function ProjectsPage() {
                   />
                 </div>
 
+                <FormField
+                  control={form.control}
+                  name="budget"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bütçe (₺)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="Proje bütçesini girin (isteğe bağlı)"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? undefined
+                                : parseFloat(e.target.value)
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -432,6 +461,12 @@ export default function ProjectsPage() {
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {project.description}
                   </p>
+                )}
+
+                {project.budget != null && (
+                  <div className="text-sm font-medium text-emerald-600">
+                    ₺{new Intl.NumberFormat("tr-TR").format(project.budget)}
+                  </div>
                 )}
 
                 <div className="flex items-center justify-between text-sm">

@@ -158,7 +158,10 @@ export async function PUT(
 
     const updatedTask = await prisma.task.update({
       where: { id },
-      data: validatedData,
+      data: {
+        ...validatedData,
+        dueDate: validatedData.dueDate ? new Date(validatedData.dueDate) : null,
+      },
       include: {
         project: {
           select: {

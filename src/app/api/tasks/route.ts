@@ -151,6 +151,7 @@ export async function POST(request: Request) {
     const task = await prisma.task.create({
       data: {
         ...validatedData,
+        dueDate: validatedData.dueDate ? new Date(validatedData.dueDate) : null,
         creatorId: session.user.id,
         order: (lastTask?.order ?? 0) + 1,
       },
