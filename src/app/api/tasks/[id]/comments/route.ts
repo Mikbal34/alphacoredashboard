@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { MESSAGES } from "@/lib/constants"
 import { z } from "zod"
+import { canAccessProject } from "@/lib/permissions"
 
 const commentSchema = z.object({
   content: z.string().min(1, "Yorum içeriği gereklidir"),
@@ -25,7 +26,6 @@ export async function GET(
       )
     }
 
-    // Check if task exists and user has access
     const task = await prisma.task.findUnique({
       where: { id },
       include: {
@@ -44,11 +44,7 @@ export async function GET(
       )
     }
 
-    const isMember = task.project.members.some(
-      (member) => member.userId === session.user.id
-    )
-
-    if (!isMember) {
+    if (!canAccessProject(session, task.project.members)) {
       return NextResponse.json(
         { error: MESSAGES.ERROR.UNAUTHORIZED },
         { status: 403 }
@@ -100,7 +96,6 @@ export async function POST(
       )
     }
 
-    // Check if task exists and user has access
     const task = await prisma.task.findUnique({
       where: { id },
       include: {
@@ -119,11 +114,7 @@ export async function POST(
       )
     }
 
-    const isMember = task.project.members.some(
-      (member) => member.userId === session.user.id
-    )
-
-    if (!isMember) {
+    if (!canAccessProject(session, task.project.members)) {
       return NextResponse.json(
         { error: MESSAGES.ERROR.UNAUTHORIZED },
         { status: 403 }

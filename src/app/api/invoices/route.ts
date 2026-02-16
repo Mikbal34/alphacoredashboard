@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { invoiceSchema } from "@/lib/validations/invoice"
 import { InvoiceStatus } from "@/generated/prisma/client"
+import { getUserFilter } from "@/lib/permissions"
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,8 +16,11 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams
     const status = searchParams.get("status") as InvoiceStatus | null
 
-    const where: any = {
-      userId: session.user.id,
+    const userFilter = getUserFilter(session)
+    const where: any = {}
+
+    if (userFilter) {
+      where.userId = userFilter
     }
 
     if (status) {

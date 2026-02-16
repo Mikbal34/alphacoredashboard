@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { taskSchema } from "@/lib/validations/task"
 import { MESSAGES } from "@/lib/constants"
+import { isAdmin, canAccessProject } from "@/lib/permissions"
 
 export async function GET(request: Request) {
   try {
@@ -35,13 +36,14 @@ export async function GET(request: Request) {
       where.status = status
     }
 
-    // Only show tasks from projects where user is a member
-    where.project = {
-      members: {
-        some: {
-          userId: session.user.id,
+    if (!isAdmin(session)) {
+      where.project = {
+        members: {
+          some: {
+            userId: session.user.id,
+          },
         },
-      },
+      }
     }
 
     const tasks = await prisma.task.findMany({
@@ -111,7 +113,6 @@ export async function POST(request: Request) {
     const body = await request.json()
     const validatedData = taskSchema.parse(body)
 
-    // Check if user is a member of the project
     const project = await prisma.project.findUnique({
       where: { id: validatedData.projectId },
       include: {
@@ -126,18 +127,13 @@ export async function POST(request: Request) {
       )
     }
 
-    const isMember = project.members.some(
-      (member) => member.userId === session.user.id
-    )
-
-    if (!isMember) {
+    if (!canAccessProject(session, project.members)) {
       return NextResponse.json(
         { error: MESSAGES.ERROR.UNAUTHORIZED },
         { status: 403 }
       )
     }
 
-    // Get the highest order for the status
     const lastTask = await prisma.task.findFirst({
       where: {
         projectId: validatedData.projectId,

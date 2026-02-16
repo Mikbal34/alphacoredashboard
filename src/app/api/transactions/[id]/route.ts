@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { transactionSchema } from "@/lib/validations/transaction"
+import { getUserFilter } from "@/lib/permissions"
 
 export async function GET(
   req: NextRequest,
@@ -16,11 +17,14 @@ export async function GET(
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 })
     }
 
+    const userFilter = getUserFilter(session)
+    const where: any = { id }
+    if (userFilter) {
+      where.userId = userFilter
+    }
+
     const transaction = await prisma.transaction.findFirst({
-      where: {
-        id,
-        userId: session.user.id,
-      },
+      where,
       include: {
         category: true,
       },
@@ -52,12 +56,13 @@ export async function PUT(
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 })
     }
 
-    const existing = await prisma.transaction.findFirst({
-      where: {
-        id,
-        userId: session.user.id,
-      },
-    })
+    const userFilter = getUserFilter(session)
+    const where: any = { id }
+    if (userFilter) {
+      where.userId = userFilter
+    }
+
+    const existing = await prisma.transaction.findFirst({ where })
 
     if (!existing) {
       return NextResponse.json({ error: "İşlem bulunamadı" }, { status: 404 })
@@ -105,12 +110,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 })
     }
 
-    const existing = await prisma.transaction.findFirst({
-      where: {
-        id,
-        userId: session.user.id,
-      },
-    })
+    const userFilter = getUserFilter(session)
+    const where: any = { id }
+    if (userFilter) {
+      where.userId = userFilter
+    }
+
+    const existing = await prisma.transaction.findFirst({ where })
 
     if (!existing) {
       return NextResponse.json({ error: "İşlem bulunamadı" }, { status: 404 })

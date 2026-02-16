@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { invoiceSchema } from "@/lib/validations/invoice"
+import { getUserFilter } from "@/lib/permissions"
 
 export async function GET(
   req: NextRequest,
@@ -16,11 +17,14 @@ export async function GET(
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 })
     }
 
+    const userFilter = getUserFilter(session)
+    const where: any = { id }
+    if (userFilter) {
+      where.userId = userFilter
+    }
+
     const invoice = await prisma.invoice.findFirst({
-      where: {
-        id,
-        userId: session.user.id,
-      },
+      where,
       include: {
         items: true,
       },
@@ -52,12 +56,13 @@ export async function PUT(
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 })
     }
 
-    const existing = await prisma.invoice.findFirst({
-      where: {
-        id,
-        userId: session.user.id,
-      },
-    })
+    const userFilter = getUserFilter(session)
+    const where: any = { id }
+    if (userFilter) {
+      where.userId = userFilter
+    }
+
+    const existing = await prisma.invoice.findFirst({ where })
 
     if (!existing) {
       return NextResponse.json({ error: "Fatura bulunamadı" }, { status: 404 })
@@ -125,12 +130,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 })
     }
 
-    const existing = await prisma.invoice.findFirst({
-      where: {
-        id,
-        userId: session.user.id,
-      },
-    })
+    const userFilter = getUserFilter(session)
+    const where: any = { id }
+    if (userFilter) {
+      where.userId = userFilter
+    }
+
+    const existing = await prisma.invoice.findFirst({ where })
 
     if (!existing) {
       return NextResponse.json({ error: "Fatura bulunamadı" }, { status: 404 })

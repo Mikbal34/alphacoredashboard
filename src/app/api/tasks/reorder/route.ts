@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { MESSAGES } from "@/lib/constants"
 import { z } from "zod"
+import { canAccessProject } from "@/lib/permissions"
 
 const reorderSchema = z.object({
   taskId: z.string().min(1),
@@ -25,7 +26,6 @@ export async function PATCH(request: Request) {
     const body = await request.json()
     const { taskId, status, order } = reorderSchema.parse(body)
 
-    // Get the task and check permissions
     const task = await prisma.task.findUnique({
       where: { id: taskId },
       include: {
@@ -44,19 +44,13 @@ export async function PATCH(request: Request) {
       )
     }
 
-    // Check if user is a member of the project
-    const isMember = task.project.members.some(
-      (member) => member.userId === session.user.id
-    )
-
-    if (!isMember) {
+    if (!canAccessProject(session, task.project.members)) {
       return NextResponse.json(
         { error: MESSAGES.ERROR.UNAUTHORIZED },
         { status: 403 }
       )
     }
 
-    // Update the task's status and order
     const updatedTask = await prisma.task.update({
       where: { id: taskId },
       data: {

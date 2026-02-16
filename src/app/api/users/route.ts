@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { userSchema } from "@/lib/validations/user"
 import bcrypt from "bcryptjs"
 import { MESSAGES } from "@/lib/constants"
+import { isAdmin } from "@/lib/permissions"
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,6 +24,7 @@ export async function GET(req: NextRequest) {
         name: true,
         email: true,
         image: true,
+        role: true,
         createdAt: true,
       },
       orderBy: {
@@ -51,6 +53,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (!isAdmin(session)) {
+      return NextResponse.json(
+        { error: MESSAGES.ERROR.UNAUTHORIZED },
+        { status: 403 }
+      )
+    }
+
     const body = await req.json()
     const validation = userSchema.safeParse(body)
 
@@ -63,7 +72,6 @@ export async function POST(req: NextRequest) {
 
     const { name, email, password } = validation.data
 
-    // Check if email already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     })
@@ -75,10 +83,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create user
     const user = await prisma.user.create({
       data: {
         name,
@@ -90,11 +96,11 @@ export async function POST(req: NextRequest) {
         name: true,
         email: true,
         image: true,
+        role: true,
         createdAt: true,
       },
     })
 
-    // Log activity
     await prisma.activityLog.create({
       data: {
         action: "created",

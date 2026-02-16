@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { taskSchema } from "@/lib/validations/task"
 import { MESSAGES } from "@/lib/constants"
+import { canAccessProject } from "@/lib/permissions"
 
 export async function GET(
   request: Request,
@@ -78,7 +79,6 @@ export async function GET(
       )
     }
 
-    // Check if user is a member of the project
     const project = await prisma.project.findUnique({
       where: { id: task.projectId },
       include: {
@@ -86,11 +86,7 @@ export async function GET(
       },
     })
 
-    const isMember = project?.members.some(
-      (member) => member.userId === session.user.id
-    )
-
-    if (!isMember) {
+    if (!canAccessProject(session, project?.members || [])) {
       return NextResponse.json(
         { error: MESSAGES.ERROR.UNAUTHORIZED },
         { status: 403 }
@@ -141,12 +137,7 @@ export async function PUT(
       )
     }
 
-    // Check if user is a member of the project
-    const isMember = task.project.members.some(
-      (member) => member.userId === session.user.id
-    )
-
-    if (!isMember) {
+    if (!canAccessProject(session, task.project.members)) {
       return NextResponse.json(
         { error: MESSAGES.ERROR.UNAUTHORIZED },
         { status: 403 }
@@ -246,12 +237,7 @@ export async function DELETE(
       )
     }
 
-    // Check if user is a member of the project
-    const isMember = task.project.members.some(
-      (member) => member.userId === session.user.id
-    )
-
-    if (!isMember) {
+    if (!canAccessProject(session, task.project.members)) {
       return NextResponse.json(
         { error: MESSAGES.ERROR.UNAUTHORIZED },
         { status: 403 }

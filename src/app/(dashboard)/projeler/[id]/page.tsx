@@ -15,12 +15,13 @@ import {
 } from "@/components/ui/dialog"
 import { KanbanBoard } from "@/components/projects/kanban-board"
 import { TaskForm } from "@/components/projects/task-form"
+import { ProjectMembers } from "@/components/projects/project-members"
 import { toast } from "sonner"
 import {
   PROJECT_STATUS_LABELS,
   PROJECT_STATUS_COLORS,
 } from "@/lib/constants"
-import { ProjectStatus, TaskStatus, TaskPriority } from "@/generated/prisma/client"
+import { ProjectStatus, TaskStatus, TaskPriority, ProjectRole } from "@/generated/prisma/client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TaskFormValues } from "@/lib/validations/task"
 import Link from "next/link"
@@ -35,6 +36,7 @@ interface Project {
   endDate: Date | null
   members: Array<{
     id: string
+    role: ProjectRole
     user: {
       id: string
       name: string
@@ -180,6 +182,7 @@ export default function ProjectDetailPage() {
         <TabsList>
           <TabsTrigger value="kanban">Kanban</TabsTrigger>
           <TabsTrigger value="liste">Liste</TabsTrigger>
+          <TabsTrigger value="uyeler">Üyeler</TabsTrigger>
         </TabsList>
 
         <TabsContent value="kanban" className="mt-6">
@@ -199,6 +202,14 @@ export default function ProjectDetailPage() {
               buraya tıklayın
             </Link>
           </div>
+        </TabsContent>
+
+        <TabsContent value="uyeler" className="mt-6">
+          <ProjectMembers
+            projectId={projectId}
+            members={project.members}
+            onMembersChange={fetchProject}
+          />
         </TabsContent>
       </Tabs>
 

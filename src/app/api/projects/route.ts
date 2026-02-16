@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { projectSchema } from "@/lib/validations/project"
 import { MESSAGES } from "@/lib/constants"
+import { isAdmin } from "@/lib/permissions"
 
 export async function GET() {
   try {
@@ -16,14 +17,18 @@ export async function GET() {
       )
     }
 
-    const projects = await prisma.project.findMany({
-      where: {
-        members: {
-          some: {
-            userId: session.user.id,
+    const where = isAdmin(session)
+      ? {}
+      : {
+          members: {
+            some: {
+              userId: session.user.id,
+            },
           },
-        },
-      },
+        }
+
+    const projects = await prisma.project.findMany({
+      where,
       include: {
         members: {
           include: {

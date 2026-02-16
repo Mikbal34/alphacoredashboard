@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { transactionSchema } from "@/lib/validations/transaction"
 import { TransactionType } from "@/generated/prisma/client"
+import { getUserFilter } from "@/lib/permissions"
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,8 +22,11 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50")
     const skip = (page - 1) * limit
 
-    const where: any = {
-      userId: session.user.id,
+    const userFilter = getUserFilter(session)
+    const where: any = {}
+
+    if (userFilter) {
+      where.userId = userFilter
     }
 
     if (type) {

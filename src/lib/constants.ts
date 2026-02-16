@@ -1,4 +1,4 @@
-import type { TaskStatus, TaskPriority, ProjectStatus } from "@/generated/prisma/client"
+import type { TaskStatus, TaskPriority, ProjectStatus, ProjectRole } from "@/generated/prisma/client"
 
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   BACKLOG: "Beklemede",
@@ -44,6 +44,12 @@ export const PROJECT_STATUS_COLORS: Record<ProjectStatus, string> = {
   ON_HOLD: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
   COMPLETED: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
   CANCELLED: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+}
+
+export const PROJECT_ROLE_LABELS: Record<ProjectRole, string> = {
+  OWNER: "Sahip",
+  MEMBER: "Üye",
+  VIEWER: "Görüntüleyici",
 }
 
 export const CHART_COLORS = [

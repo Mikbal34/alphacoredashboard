@@ -33,6 +33,7 @@ async function main() {
       name: "Muhammet İkbal Köç",
       email: "ikbal80koc@gmail.com",
       hashedPassword: await bcrypt.hash("admin123", 12),
+      role: "ADMIN",
     },
   })
 
@@ -41,6 +42,7 @@ async function main() {
       name: "Abdulmelik Eymen Alpat",
       email: "eymenalpat0@gmail.com",
       hashedPassword: await bcrypt.hash("admin123", 12),
+      role: "ADMIN",
     },
   })
 
