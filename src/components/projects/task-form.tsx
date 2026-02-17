@@ -174,8 +174,8 @@ export function TaskForm({
               <FormItem>
                 <FormLabel>Atanan Kişi</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  onValueChange={(val) => field.onChange(val === "none" ? "" : val)}
+                  defaultValue={field.value || "none"}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -183,7 +183,7 @@ export function TaskForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">Atanmamış</SelectItem>
+                    <SelectItem value="none">Atanmamış</SelectItem>
                     {members.map((member) => (
                       <SelectItem key={member.user.id} value={member.user.id}>
                         {member.user.name}
